@@ -1,5 +1,8 @@
 #include <string>
 #include <fstream>
+#include <iterator>
+#include <iostream>
+
 
 // Classic helper function
 class Util {
@@ -9,6 +12,7 @@ public:
 static std::string convertToTime ( long int input_seconds );
 static std::string getProgressBar(std::string percent);
 static std::ifstream getStream(std::string path);
+static std::vector<std::string> splitLine(std::string line);
 };
 
 std::string Util::convertToTime (long int input_seconds){
@@ -55,3 +59,12 @@ std::ifstream Util::getStream(std::string path){
     }
     return stream;
 }
+
+std::vector<std::string> Util::splitLine(std::string line){
+    std::istringstream buffer(line); 
+    std::istream_iterator<std::string> st(buffer), end; //splicing
+    std::vector<std::string> values(st,end);
+	return values;
+}
+
+

@@ -73,10 +73,9 @@ std::string ProcessParser::getVmSize(string pid){
   	
   	while(std::getline(stream,line)){
     	if( line.compare(0, nm.size() ,nm)==0 ){
-        	istringstream buffer(line); 
-          	istream_iterator<string> st(buffer), end; //splicing
-          	vector<string> values(st,end);
-          	value = (stof(values[1])/float(1024*1024));
+            
+          	vector<string> values = Util::splitLine(line);        
+            value = (stof(values[1])/float(1024*1024));
           	break;
         }
     }
@@ -93,9 +92,7 @@ std::string ProcessParser::getCpuPercent(string pid){
   std::string line;
   ifstream stream = Util::getStream( (Path::basePath() + pid + Path::statPath())); //single line
   std::getline(stream,line);
-  istringstream buffer(line);
-  istream_iterator<string> st(buffer), end; //splicing
-  vector<string> values(st,end);
+  vector<string> values = Util::splitLine(line);        
   float stime = stof(values[14]);  //stime 14 [ticks], CPU time in kernel
   float cutime = stof(values[15]); //cutime 15 [ticks], waited for childrens cpu time in user
   float cstime = stof(values[16]); //cstime 16 [ticks], waited for childrens cpu time in kernel
@@ -116,9 +113,7 @@ std::vector<std::string> ProcessParser::getSysCpuPercent(std::string coreNumber)
   	ifstream stream = Util::getStream((Path::basePath() + "stat"));
   	while(std::getline(stream,line)){
     	if( line.compare(0, nm.size() ,nm)==0 ){
-        	istringstream buffer(line); 
-          	istream_iterator<string> st(buffer), end; //splicing
-          	vector<string> values(st,end);
+        	vector<string> values = Util::splitLine(line);        
           	return values;
           	
         }
@@ -150,13 +145,11 @@ std::string ProcessParser::PrintCpuStats(std::vector<std::string> values1, std::
 
 int ProcessParser::getNumberOfCores(){
   	string line;
-  	string nm = "cpu_cores";
+  	string nm = "cpu cores";
   	ifstream stream = Util::getStream((Path::basePath() + "cpuinfo"));
   	while(std::getline(stream,line)){
     	if( line.compare(0, nm.size() ,nm)==0 ){
-        	istringstream buffer(line); 
-          	istream_iterator<string> st(buffer), end; //splicing
-          	vector<string> values(st,end);
+        	vector<string> values = Util::splitLine(line);        
           	return stoi(values[3]);
           	
         }
@@ -170,9 +163,7 @@ std::string ProcessParser::getProcUpTime(string pid){
   std::string line;
   ifstream stream = Util::getStream( (Path::basePath() + pid + Path::statPath())); //single line
   std::getline(stream,line);
-  istringstream buffer(line);
-  istream_iterator<string> st(buffer), end; //splicing
-  std::vector<string> values(st,end);
+  vector<string> values = Util::splitLine(line);
   std::string uptime = values[13]; //[s]
   return std::to_string(float(stof(uptime)/sysconf(_SC_CLK_TCK)));
 }
@@ -205,9 +196,7 @@ float ProcessParser::getSysUpTime(){
   std::string line;
   ifstream stream = Util::getStream( (Path::basePath() + Path::upTimePath()) ); //single line
   std::getline(stream,line);
-  istringstream buffer(line);
-  istream_iterator<string> st(buffer), end; //splicing
-  std::vector<string> values(st,end);
+  vector<string> values = Util::splitLine(line);
   return stof(values[0]);
 }
   
@@ -219,9 +208,7 @@ std::string ProcessParser::getProcUser(std::string pid){
   ifstream stream = Util::getStream( (Path::basePath() + pid + Path::statusPath())); //single line
   while(std::getline(stream,line)){
     if( line.compare(0, nm.size() ,nm)==0 ){
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       nm = ("x:" + values[1]);
       break;
     }
@@ -241,10 +228,8 @@ std::string ProcessParser::getSysKernelVersion(){
 	string line;
   	ifstream stream = Util::getStream( (Path::basePath() + Path::versionPath()) );
   	std::getline(stream,line);
-    istringstream buffer(line); 
-    istream_iterator<string> st(buffer), end; //splicing
-    vector<string> values(st,end);
-    return values[2];
+    vector<string> values = Util::splitLine(line);
+  	return values[2];
 }
 
 
@@ -274,10 +259,8 @@ int ProcessParser::getTotalThreads(){
     ifstream stream = Util::getStream( (Path::basePath() + pid + Path::statusPath()) );
     while (std::getline(stream, line)) {
       if (line.compare(0, nm.size() ,nm)==0 ){
-        istringstream buffer(line);
-      	istream_iterator<string> st(buffer), end; //splicing
-      	vector<string> values(st,end);
-      	totalthreads += stoi(values[1]);
+        vector<string> values = Util::splitLine(line);
+        totalthreads += stoi(values[1]);
       	break;
       }
   	}
@@ -292,9 +275,7 @@ int ProcessParser::getTotalNumberOfProcesses(){
   ifstream stream = Util::getStream( (Path::basePath() + "stat"));
   while (std::getline(stream, line)) {
     if (line.compare(0, nm.size() ,nm)==0 ){
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       return stoi(values[1]);
     }
   }
@@ -307,9 +288,7 @@ int ProcessParser::getNumberOfRunningProcesses(){
   ifstream stream = Util::getStream( (Path::basePath() + "stat"));
   while (std::getline(stream, line)) {
     if (line.compare(0, nm.size() ,nm)==0 ){
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       return stoi(values[1]);
     }
   }
@@ -332,21 +311,15 @@ float ProcessParser::getSysRamPercent(){
     if (total_mem!=0 && free_mem!=0 && buffers!=0)
       break;
     if (line.compare(0, nm1.size() ,nm1)==0 ){
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       total_mem = stof(values[1]);
     }
     if (line.compare(0, nm2.size() ,nm2)==0 ){
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       free_mem = stof(values[1]);
     }
 	if (line.compare(0, nm3.size(), nm3) == 0) {
-      istringstream buffer(line);
-      istream_iterator<string> st(buffer), end; //splicing
-      vector<string> values(st,end);
+      vector<string> values = Util::splitLine(line);
       buffers = stof(values[1]);
     }
   }
